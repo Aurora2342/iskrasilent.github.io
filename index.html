@@ -1,1 +1,48 @@
-<iframe src="https://www.google.com/maps/d/u/0/edit?mid=1-mTMS_EO-MDHS-N9luTVm8EjO5ECwcg&usp=sharing" width="100%" height="600"></iframe>
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>War maps</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#fafafa; color:#111; }
+    header{ padding:16px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06); display:flex; align-items:center; gap:12px; }
+    h1{ font-size:18px; margin:0; }
+    .container{ max-width:1200px; margin:18px auto; padding:0 12px; }
+    .map-wrap{ position:relative; padding-top:56.25%; background:#eee; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    .map-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+    .actions{ margin-left:auto; display:flex; gap:8px; }
+    .btn{ background:#0b63d6; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; }
+    .btn.secondary{ background:#e6eefc; color:#0b63d6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>War maps</h1>
+    <div class="actions">
+      <button class="btn" id="openFull">Otvori u novom prozoru</button>
+      <a class="btn secondary" href="/" style="text-decoration:none; display:inline-flex; align-items:center;">Početna</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="map-wrap" id="mapWrap">
+      <iframe id="mymap"
+        src="https://www.google.com/maps/d/u/0/embed?mid=1-mTMS_EO-MDHS-N9luTVm8EjO5ECwcg&ehbc=2E312F"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="My Maps karta">
+      </iframe>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('openFull').addEventListener('click', function(){
+      const src = document.getElementById('mymap').src;
+      if(src) window.open(src, '_blank', 'noopener');
+      else alert('Nije postavljen src za iframe.');
+    });
+  </script>
+</body>
+</html>
