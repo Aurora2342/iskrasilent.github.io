@@ -1,4 +1,11 @@
 {
-  "users": [],
+  "users": [
+    {
+      "email": "test@example.com",
+      "password": "123",
+      "channel": "TestChannel",
+      "avatar": null
+    }
+  ],
   "videos": []
 }
