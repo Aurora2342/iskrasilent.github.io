@@ -1,0 +1,12 @@
+body { 
+  margin:0; 
+  font-family:sans-serif; 
+  background:#111; 
+  color:#fff; 
+}
+input, button, select, textarea { font-family:sans-serif; margin: 4px 0; }
+h1, h2 { color:#a855f7; }
+button { cursor:pointer; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; }
+video { display:block; margin:5px 0; max-width: 320px; }
+.avatar { width:40px; height:40px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+.container { max-width:600px; margin:auto; padding:20px; background:#222; border-radius:10px; }
