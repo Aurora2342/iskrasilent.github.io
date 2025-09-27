@@ -2,30 +2,30 @@ const ROOT = document.getElementById('root');
 let DATA = { users: [], videos: [] };
 let CURRENT_USER = null;
 let CURRENT_VIEW = 'home'; // home, myChannel, search
+const API_BASE = 'http://YOUR_VPS_IP:3000/api'; // zameni sa tvojim VPS IP
 
-// ----------------- LocalStorage keys -----------------
-const USERS_KEY = 'iskraSilentUsers';
-const VIDEOS_KEY = 'iskraSilentVideos';
-const CURRENT_USER_KEY = 'iskraSilentCurrentUser';
-
-// ----------------- Load data from localStorage -----------------
-function loadData() {
-  const savedUsers = localStorage.getItem(USERS_KEY);
-  if(savedUsers) DATA.users = JSON.parse(savedUsers);
-
-  const savedVideos = localStorage.getItem(VIDEOS_KEY);
-  if(savedVideos) DATA.videos = JSON.parse(savedVideos);
-
-  const savedUserEmail = localStorage.getItem(CURRENT_USER_KEY);
-  if(savedUserEmail) CURRENT_USER = DATA.users.find(u => u.email === savedUserEmail) || null;
+// ---------------- Load/Save via backend ----------------
+async function loadData() {
+  try {
+    const res = await fetch(`${API_BASE}/data`);
+    DATA = await res.json();
+  } catch(err) {
+    console.error('Cannot load data', err);
+    DATA = { users: [], videos: [] };
+  }
 }
 
-// ----------------- Save data -----------------
-function saveUsers() { localStorage.setItem(USERS_KEY, JSON.stringify(DATA.users)); }
-function saveVideos() { localStorage.setItem(VIDEOS_KEY, JSON.stringify(DATA.videos)); }
-function saveCurrentUser() { localStorage.setItem(CURRENT_USER_KEY, CURRENT_USER.email); }
+async function saveData() {
+  try {
+    await fetch(`${API_BASE}/data`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(DATA)
+    });
+  } catch(err) { console.error('Cannot save data', err); }
+}
 
-// ----------------- Login/Register -----------------
+// ---------------- Login/Register ----------------
 function renderLogin() {
   ROOT.innerHTML = `
     <div class="container">
@@ -33,7 +33,6 @@ function renderLogin() {
       <input id="email" placeholder="Email"/><br/>
       <input id="password" type="password" placeholder="Password"/><br/>
       <input id="channel" placeholder="Channel name (for register)"/><br/>
-      <input id="avatar" type="file" accept="image/*"/><br/>
       <button id="loginBtn">Login</button>
       <button id="registerBtn">Register</button>
     </div>
@@ -48,7 +47,7 @@ function loginUser() {
   const user = DATA.users.find(u => u.email === email && u.password === password);
   if(!user) return alert('Invalid credentials');
   CURRENT_USER = user;
-  saveCurrentUser();
+  CURRENT_VIEW = 'home';
   renderApp();
 }
 
@@ -56,37 +55,21 @@ function registerUser() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   const channel = document.getElementById('channel').value.trim();
-  const avatarInput = document.getElementById('avatar');
-
   if(!email || !password || !channel) return alert('Fill all fields');
   if(DATA.users.some(u => u.email === email)) return alert('Email exists');
-
-  let avatar = null;
-  if(avatarInput.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      avatar = e.target.result;
-      DATA.users.push({email,password,channel,avatar});
-      saveUsers();
-      CURRENT_USER = DATA.users[DATA.users.length-1];
-      saveCurrentUser();
-      renderApp();
-    };
-    reader.readAsDataURL(avatarInput.files[0]);
-  } else {
-    DATA.users.push({email,password,channel,avatar});
-    saveUsers();
-    CURRENT_USER = DATA.users[DATA.users.length-1];
-    saveCurrentUser();
-    renderApp();
-  }
+  const newUser = { email, password, channel, avatar:null };
+  DATA.users.push(newUser);
+  CURRENT_USER = newUser;
+  CURRENT_VIEW = 'home';
+  renderApp();
+  saveData();
 }
 
-// ----------------- App Rendering -----------------
+// ---------------- App Rendering ----------------
 function renderApp() {
   let html = `
     <div class="container">
-      <h1>${CURRENT_USER.avatar?`<img src="${CURRENT_USER.avatar}" class="avatar"/>`:''} ${CURRENT_USER.channel} — Iskra Silent</h1>
+      <h1>${CURRENT_USER?.channel || ''} — Iskra Silent</h1>
       <nav>
         <button onclick="switchView('home')">Home</button>
         <button onclick="switchView('myChannel')">My Channel</button>
@@ -96,10 +79,7 @@ function renderApp() {
       <hr/>
   `;
 
-  if(CURRENT_VIEW==='home'){
-    html+=`<h2>Welcome!</h2><p>Use the menu to upload videos, view your channel or search videos.</p>`;
-  }
-
+  if(CURRENT_VIEW==='home') html+=`<div id="videoList"></div>`;
   if(CURRENT_VIEW==='myChannel'){
     html+=`
       <h2>Upload Video</h2>
@@ -111,11 +91,9 @@ function renderApp() {
       </select><br/>
       <button id="addVideoBtn">Add Video</button>
       <h2>My Videos</h2>
-      <input id="filterSearch" placeholder="Filter by name, description or visibility"/>
-      <div id="videoList"></div>
+      <div id="myVideoList"></div>
     `;
   }
-
   if(CURRENT_VIEW==='search'){
     html+=`
       <h2>Search Videos</h2>
@@ -129,86 +107,100 @@ function renderApp() {
 
   if(CURRENT_VIEW==='myChannel'){
     document.getElementById('addVideoBtn').onclick = addVideo;
-    document.getElementById('filterSearch').oninput = renderVideos;
   }
-
-  if(CURRENT_VIEW==='search'){
-    document.getElementById('searchInput').oninput = renderSearch;
-  }
-
-  renderVideos();
-  renderSearch();
+  if(CURRENT_VIEW==='home') renderVideos();
+  if(CURRENT_VIEW==='myChannel') renderMyVideos();
+  if(CURRENT_VIEW==='search') document.getElementById('searchInput').oninput = renderSearch;
 }
 
-// ----------------- Navigation -----------------
+// ---------------- Navigation ----------------
 function switchView(view){ CURRENT_VIEW=view; renderApp(); }
-function logoutUser(){ CURRENT_USER=null; localStorage.removeItem(CURRENT_USER_KEY); CURRENT_VIEW='home'; renderLogin(); }
+function logoutUser(){ CURRENT_USER=null; CURRENT_VIEW='home'; renderLogin(); }
 
-// ----------------- Video Functions -----------------
-function addVideo(){
+// ---------------- Video Functions ----------------
+async function addVideo(){
   const files = document.getElementById('videoUpload').files;
   const desc = document.getElementById('videoDesc').value.trim();
   const visibility = document.getElementById('videoVisibility').value;
   if(!files.length) return alert('Select files');
 
-  Array.from(files).forEach(file=>{
-    const url = URL.createObjectURL(file);
-    DATA.videos.push({
-      id: Date.now()+Math.random(),
-      name: file.name,
-      description: desc,
-      url,
-      visibility, // public/private
-      channel: CURRENT_USER.channel
-    });
+  const uploadPromises = Array.from(files).map(file=>{
+    const formData = new FormData();
+    formData.append('video', file);
+    formData.append('description', desc);
+    formData.append('visibility', visibility);
+    formData.append('channel', CURRENT_USER.channel);
+    return fetch(`${API_BASE}/upload`, { method:'POST', body: formData })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.success) DATA.videos.push(data.video);
+      });
   });
 
-  saveVideos();
+  await Promise.all(uploadPromises);
+  renderMyVideos();
   renderVideos();
+  saveData();
 }
 
 function renderVideos(){
-  const list=document.getElementById('videoList'); 
-  if(!list) return;
-  const filter=document.getElementById('filterSearch')?.value.toLowerCase()||'';
-  list.innerHTML='';
-  DATA.videos
-    .filter(v=>v.channel===CURRENT_USER.channel)
-    .filter(v=>v.name.toLowerCase().includes(filter)||(v.description||'').toLowerCase().includes(filter)||v.visibility.includes(filter))
-    .forEach(v=>{
-      const container = document.createElement('div');
-      container.innerHTML=`
-        <strong>${v.name}</strong> (${v.visibility})<br/>
-        ${v.description?`<em>${v.description}</em><br/>`:''}
-        <video src="${v.url}" controls></video><br/>
-        <button class="deleteBtn">Delete</button>
-        <hr/>
-      `;
-      container.querySelector('.deleteBtn').onclick = ()=>{
-        DATA.videos = DATA.videos.filter(x=>x.id!==v.id);
-        saveVideos();
-        renderVideos();
-      };
-      list.appendChild(container);
-    });
+  const container = document.getElementById('videoList');
+  if(!container) return;
+  container.innerHTML = '';
+  DATA.videos.filter(v=>v.visibility==='public').forEach(v=>{
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3>${v.name} (${v.channel})</h3>
+      ${v.description?`<p>${v.description}</p>`:''}
+      <video src="${v.url}" controls width="400"></video><hr/>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderMyVideos(){
+  const container = document.getElementById('myVideoList');
+  if(!container) return;
+  container.innerHTML = '';
+  DATA.videos.filter(v=>v.channel===CURRENT_USER.channel).forEach(v=>{
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h4>${v.name}</h4>
+      ${v.description?`<p>${v.description}</p>`:''}
+      <video src="${v.url}" controls width="400"></video>
+      <button onclick="deleteVideo(${v.id})">Delete</button>
+      <hr/>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function deleteVideo(id){
+  DATA.videos = DATA.videos.filter(v=>v.id!==id);
+  renderMyVideos();
+  renderVideos();
+  saveData();
 }
 
 function renderSearch(){
-  const container=document.getElementById('searchResults'); 
+  const container = document.getElementById('searchResults');
   if(!container) return;
-  const query=document.getElementById('searchInput')?.value.toLowerCase()||'';
-  container.innerHTML='';
-  DATA.videos
-    .filter(v=>v.name.toLowerCase().includes(query)||(v.description||'').toLowerCase().includes(query)||v.channel.toLowerCase().includes(query))
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  container.innerHTML = '';
+  DATA.videos.filter(v=>v.name.toLowerCase().includes(query) || (v.description||'').toLowerCase().includes(query) || v.channel.toLowerCase().includes(query))
     .forEach(v=>{
-      const div=document.createElement('div');
-      div.innerHTML=`<strong>${v.name}</strong> (${v.channel})<br/>${v.description?`<em>${v.description}</em><br/>`:''}<video src="${v.url}" controls></video><hr/>`;
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <h4>${v.name} (${v.channel})</h4>
+        ${v.description?`<p>${v.description}</p>`:''}
+        <video src="${v.url}" controls width="400"></video><hr/>
+      `;
       container.appendChild(div);
     });
 }
 
-// ----------------- Start -----------------
-loadData();
-if(CURRENT_USER) renderApp();
-else renderLogin();
-
+// ---------------- Start ----------------
+loadData().then(()=>{
+  if(CURRENT_USER) renderApp();
+  else renderLogin();
+});
