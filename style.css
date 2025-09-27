@@ -1,8 +1,10 @@
 body { margin:0; font-family:sans-serif; background:#111; color:#fff; }
 .container { max-width:700px; margin:20px auto; padding:20px; background:#222; border-radius:10px; }
 h1,h2 { color:#a855f7; }
-input, button, select, textarea { font-family:sans-serif; margin:5px 0; padding:5px; }
-button { cursor:pointer; background:#333; color:#fff; border:none; border-radius:5px; }
-video { display:block; margin:5px 0; max-width:100%; }
-.avatar { width:40px; height:40px; border-radius:50%; margin-right:5px; vertical-align:middle; }
-nav button { margin-right:5px; }
+input, button, select, textarea { font-family:sans-serif; margin:5px 0; padding:8px; width:100%; box-sizing:border-box; border-radius:5px; border:none; }
+button { cursor:pointer; background:#333; color:#fff; border:none; border-radius:5px; padding:8px 12px; transition:0.2s; }
+button:hover { background:#a855f7; }
+video { display:block; margin:5px 0; max-width:100%; border-radius:5px; }
+.avatar { width:40px; height:40px; border-radius:50%; margin-right:10px; vertical-align:middle; }
+nav button { margin-right:5px; margin-bottom:5px; }
+hr { border:0; height:1px; background:#444; margin:10px 0; }
