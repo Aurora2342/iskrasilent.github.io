@@ -1,12 +1,8 @@
-body { 
-  margin:0; 
-  font-family:sans-serif; 
-  background:#111; 
-  color:#fff; 
-}
-input, button, select, textarea { font-family:sans-serif; margin: 4px 0; }
-h1, h2 { color:#a855f7; }
-button { cursor:pointer; background:#333; color:#fff; border:none; padding:5px 10px; border-radius:5px; }
-video { display:block; margin:5px 0; max-width: 320px; }
+body { margin:0; font-family:sans-serif; background:#111; color:#fff; }
+.container { max-width:700px; margin:20px auto; padding:20px; background:#222; border-radius:10px; }
+h1,h2 { color:#a855f7; }
+input, button, select, textarea { font-family:sans-serif; margin:5px 0; padding:5px; }
+button { cursor:pointer; background:#333; color:#fff; border:none; border-radius:5px; }
+video { display:block; margin:5px 0; max-width:100%; }
 .avatar { width:40px; height:40px; border-radius:50%; margin-right:5px; vertical-align:middle; }
-.container { max-width:600px; margin:auto; padding:20px; background:#222; border-radius:10px; }
+nav button { margin-right:5px; }
