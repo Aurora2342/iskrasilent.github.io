@@ -6,12 +6,12 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: auto;
     background-color: white;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
 }
 
 h1, h2 {
@@ -19,7 +19,7 @@ h1, h2 {
 }
 
 .question {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .slider {
@@ -29,10 +29,28 @@ h1, h2 {
 #result {
     display: none;
     text-align: center;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 canvas {
-    border: 1px solid #ccc;
-    margin-top: 10px;
+    border: 2px solid #ccc;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
 }
