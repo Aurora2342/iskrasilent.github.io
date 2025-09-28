@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidSpark Political Compass</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>VidSpark Political Compass</h1>
+    <form id="quizForm">
+        <div class="question">
+            <p>1. The government should have more control over the economy.</p>
+            <input type="range" min="1" max="5" value="3" class="slider" name="q1">
+        </div>
+        <div class="question">
+            <p>2. Personal freedoms are more important than security.</p>
+            <input type="range" min="1" max="5" value="3" class="slider" name="q2">
+        </div>
+        <div class="question">
+            <p>3. Taxes should be higher for the rich.</p>
+            <input type="range" min="1" max="5" value="3" class="slider" name="q3">
+        </div>
+        <div class="question">
+            <p>4. The government should interfere as little as possible in people's private lives.</p>
+            <input type="range" min="1" max="5" value="3" class="slider" name="q4">
+        </div>
+        <button type="button" id="submitBtn">Show Result</button>
+    </form>
+    <div id="result">
+        <h2>Your Political Compass</h2>
+        <canvas id="compass" width="400" height="400"></canvas>
+        <p id="coordinates"></p>
+    </div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>
