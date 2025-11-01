@@ -2,101 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Drone Error Logger</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #f0f0f0;
-            margin: 20px;
-        }
-        h1 {
-            color: #ff4c4c;
-        }
-        input, textarea, button {
-            margin: 5px 0;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            border: none;
-        }
-        button {
-            background-color: #ff4c4c;
-            color: #fff;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ff1a1a;
-        }
-        .log-entry {
-            background-color: #2a2a2a;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-        }
-    </style>
+    <title>Drone Error Logger - Console Only</title>
 </head>
 <body>
-    <h1>Drone Error Logger</h1>
-    
-    <label for="errorDesc">Error Description:</label>
-    <textarea id="errorDesc" placeholder="Describe the error..."></textarea>
-    
-    <button onclick="addError()">Log Error</button>
-    
-    <h2>Logged Errors:</h2>
-    <div id="logContainer"></div>
-    
+    <h1>Drone Error Logger (Console Only)</h1>
+
     <script>
-        // Load existing logs from localStorage
-        let errors = JSON.parse(localStorage.getItem('droneErrors')) || [];
+        // Niz za čuvanje grešaka drona
+        let droneErrors = [];
 
-        function displayErrors() {
-            const container = document.getElementById('logContainer');
-            container.innerHTML = '';
-            errors.forEach((e, index) => {
-                const div = document.createElement('div');
-                div.className = 'log-entry';
-                div.innerHTML = `<strong>${e.date}</strong>: ${e.desc}`;
-                container.appendChild(div);
-            });
-        }
-
-        function addError() {
-            const desc = document.getElementById('errorDesc').value.trim();
-            if (!desc) {
-                alert('Please enter an error description.');
-                return;
-            }
-
+        // Funkcija za logovanje greške
+        function logError(desc, type = 'ERROR') {
             const now = new Date();
             const error = {
                 date: now.toLocaleString(),
-                desc: desc
+                desc: desc,
+                type: type
             };
-            errors.push(error);
-            localStorage.setItem('droneErrors', JSON.stringify(errors));
-            document.getElementById('errorDesc').value = '';
-            displayErrors();
+            droneErrors.push(error);
+
+            // Prikaz u konzoli
+            if (type === 'ERROR') console.error(`[${type}] ${error.date}: ${error.desc}`);
+            else console.warn(`[${type}] ${error.date}: ${error.desc}`);
         }
 
-        displayErrors();
-
-        // Optional: download as .txt
-        function downloadLog() {
-            let text = errors.map(e => `${e.date}: ${e.desc}`).join('\n');
-            const blob = new Blob([text], {type: 'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'drone_errors.txt';
-            a.click();
+        // Funkcija za pregled svih grešaka
+        function showErrors() {
+            console.log("=== All Drone Errors ===");
+            droneErrors.forEach(e => {
+                if (e.type === 'ERROR') console.error(`${e.date}: ${e.desc}`);
+                else console.warn(`${e.date}: ${e.desc}`);
+            });
         }
 
-        // Add a download button dynamically
-        const downloadBtn = document.createElement('button');
-        downloadBtn.textContent = "Download Log (.txt)";
-        downloadBtn.onclick = downloadLog;
-        document.body.appendChild(downloadBtn);
+        // Automatsko hvatanje JS grešaka
+        window.onerror = function(message, source, lineno, colno, error) {
+            logError(`${message} at ${source}:${lineno}:${colno}`, 'ERROR');
+        };
+
+        // Hvatanje unhandled promise rejections
+        window.onunhandledrejection = function(event) {
+            logError(`Unhandled promise rejection: ${event.reason}`, 'ERROR');
+        };
+
+        // Hvatanje upozorenja (override console.warn)
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            logError(args.join(' '), 'WARNING');
+            originalWarn.apply(console, args);
+        };
+
+        // Primena logError iz tvog dron koda je jednostavna:
+        // logError("Signal lost at 30 MHz");
+        // logError("Battery low");
     </script>
 </body>
 </html>
