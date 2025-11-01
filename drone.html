@@ -2,66 +2,80 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Drone Logger - GitHub Pages</title>
+<title>Drone Logger - Colored Embedded Console</title>
 <style>
     body { font-family: Arial; background: #1a1a1a; color: #f0f0f0; padding: 20px; }
-    input, select, button { padding: 8px; margin: 5px 0; border-radius: 5px; border: none; }
+    #console { background: #2a2a2a; padding: 10px; border-radius: 5px; height: 300px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; }
+    input, select, button { padding: 6px; margin: 5px 0; border-radius: 5px; border: none; }
     button { background: #ff4c4c; color: white; cursor: pointer; }
     button:hover { background: #ff1a1a; }
-    #logArea { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; }
+    .ERROR { color: #ff4c4c; }
+    .WARNING { color: #ffaa00; }
+    .INFO { color: #00ccff; }
 </style>
 </head>
 <body>
-<h1>Drone Logger (GitHub Pages)</h1>
-<p>Unesi grešku drona i klikni "Log Error". Sve se čuva lokalno u tvom browseru.</p>
+<h1>Drone Logger - Embedded Colored Console</h1>
+<p>Greške drona se prikazuju ovde. Možeš unositi greške ili komande.</p>
 
-<input type="text" id="errorInput" placeholder="Opis greške...">
+<input type="text" id="commandInput" placeholder="Unesi grešku ili komandu">
 <select id="errorType">
     <option value="ERROR">ERROR</option>
     <option value="WARNING">WARNING</option>
 </select>
-<button onclick="logDroneError()">Log Error</button>
-<button onclick="showErrors()">Prikaži sve greške</button>
-<button onclick="copyLogs()">Kopiraj sve greške</button>
-<button onclick="clearLog()">Clear Log</button>
+<button onclick="executeCommand()">Log / Run</button>
+<button onclick="clearConsole()">Clear Console</button>
+<button onclick="copyLogs()">Copy Logs</button>
 
-<div id="logArea"></div>
+<div id="console"></div>
 
 <script>
-let droneErrors = JSON.parse(localStorage.getItem('droneErrors')) || [];
+let droneErrors = [];
 
-// Funkcija za prikaz loga na stranici i konzoli
-function updateLogDisplay() {
-    const logArea = document.getElementById('logArea');
-    logArea.textContent = droneErrors.join('\n');
+// Funkcija za prikaz loga u embedded konzoli sa bojama
+function updateConsole() {
+    const consoleDiv = document.getElementById('console');
+    consoleDiv.innerHTML = droneErrors.map(e => {
+        if(e.startsWith('[ERROR]')) return `<span class="ERROR">${e}</span>`;
+        if(e.startsWith('[WARNING]')) return `<span class="WARNING">${e}</span>`;
+        return `<span class="INFO">${e}</span>`;
+    }).join('\n');
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
 }
 
-// Funkcija za logovanje greške
-function logDroneError() {
-    const desc = document.getElementById('errorInput').value.trim();
-    if(!desc) return alert("Unesi opis greške!");
+// Funkcija koja loguje grešku ili izvršava komandu
+function executeCommand() {
+    const input = document.getElementById('commandInput').value.trim();
+    if(!input) return;
 
-    const type = document.getElementById('errorType').value;
-    const now = new Date();
-    const logLine = `[${type}] ${now.toLocaleString()}: ${desc}`;
-    droneErrors.push(logLine);
-    localStorage.setItem('droneErrors', JSON.stringify(droneErrors));
+    // Komande počinju sa "/"
+    if(input.startsWith("/")) {
+        const cmd = input.slice(1).toLowerCase();
+        if(cmd === "show") {
+            droneErrors.push(`[INFO] ${new Date().toLocaleString()}: Prikaz svih logova`);
+        } else if(cmd === "clear") {
+            droneErrors = [];
+        } else {
+            droneErrors.push(`[WARNING] ${new Date().toLocaleString()}: Nepoznata komanda ${cmd}`);
+        }
+    } else {
+        const type = document.getElementById('errorType').value;
+        const now = new Date();
+        const logLine = `[${type}] ${now.toLocaleString()}: ${input}`;
+        droneErrors.push(logLine);
+    }
 
-    if(type === "ERROR") console.error(logLine);
-    else console.warn(logLine);
-
-    updateLogDisplay();
-    document.getElementById('errorInput').value = '';
+    document.getElementById('commandInput').value = '';
+    updateConsole();
 }
 
-// Prikaz svih logova
-function showErrors() {
-    console.log("=== All Drone Errors ===");
-    droneErrors.forEach(e => console.log(e));
-    updateLogDisplay();
+// Dugme za čišćenje konzole
+function clearConsole() {
+    droneErrors = [];
+    updateConsole();
 }
 
-// Kopiranje logova u clipboard
+// Dugme za kopiranje loga u clipboard
 function copyLogs() {
     const text = droneErrors.join('\n');
     navigator.clipboard.writeText(text)
@@ -69,18 +83,8 @@ function copyLogs() {
         .catch(err => alert("Greške se ne mogu kopirati: " + err));
 }
 
-// Brisanje loga
-function clearLog() {
-    if(confirm("Da li želiš da obrišeš sve logove?")) {
-        droneErrors = [];
-        localStorage.removeItem('droneErrors');
-        updateLogDisplay();
-        console.clear();
-    }
-}
-
-// Prikaz prethodnih logova pri učitavanju stranice
-updateLogDisplay();
+// Prikaz prethodnih logova pri učitavanju
+updateConsole();
 </script>
 </body>
 </html>
