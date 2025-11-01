@@ -1,62 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Drone Logger - GitHub Pages</title>
-    <style>
-        body { font-family: Arial; background: #1a1a1a; color: #f0f0f0; padding: 20px; }
-        button { margin: 10px 0; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; background: #ff4c4c; color: white; }
-        button:hover { background: #ff1a1a; }
-    </style>
+<meta charset="UTF-8">
+<title>Drone Logger - GitHub Pages</title>
+<style>
+    body { font-family: Arial; background: #1a1a1a; color: #f0f0f0; padding: 20px; }
+    input, select, button { padding: 8px; margin: 5px 0; border-radius: 5px; border: none; }
+    button { background: #ff4c4c; color: white; cursor: pointer; }
+    button:hover { background: #ff1a1a; }
+    #logArea { margin-top: 20px; white-space: pre-wrap; background: #2a2a2a; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; }
+</style>
 </head>
 <body>
-    <h1>Drone Logger</h1>
-    <p>Greške drona će biti prikazane u konzoli. Sve se čuva lokalno u browseru.</p>
+<h1>Drone Logger (GitHub Pages)</h1>
+<p>Unesi grešku drona i klikni "Log Error". Sve se čuva lokalno u tvom browseru.</p>
 
-    <button onclick="showConsoleInstructions()">Kako otvoriti konzolu</button>
-    <button onclick="logger.showErrors()">Prikaži sve greške</button>
-    <button onclick="copyLogs()">Kopiraj sve greške u clipboard</button>
+<input type="text" id="errorInput" placeholder="Opis greške...">
+<select id="errorType">
+    <option value="ERROR">ERROR</option>
+    <option value="WARNING">WARNING</option>
+</select>
+<button onclick="logDroneError()">Log Error</button>
+<button onclick="showErrors()">Prikaži sve greške</button>
+<button onclick="copyLogs()">Kopiraj sve greške</button>
+<button onclick="clearLog()">Clear Log</button>
 
-    <script>
-        // Logger klasa
-        class DroneLogger {
-            constructor() {
-                this.errors = JSON.parse(localStorage.getItem('droneErrors')) || [];
-            }
+<div id="logArea"></div>
 
-            logError(desc, type="ERROR") {
-                const now = new Date();
-                const logLine = `[${type}] ${now.toLocaleString()}: ${desc}`;
-                this.errors.push(logLine);
-                localStorage.setItem('droneErrors', JSON.stringify(this.errors));
+<script>
+let droneErrors = JSON.parse(localStorage.getItem('droneErrors')) || [];
 
-                if(type==="ERROR") console.error(logLine);
-                else console.warn(logLine);
-            }
+// Funkcija za prikaz loga na stranici i konzoli
+function updateLogDisplay() {
+    const logArea = document.getElementById('logArea');
+    logArea.textContent = droneErrors.join('\n');
+}
 
-            showErrors() {
-                console.log("=== All Drone Errors ===");
-                this.errors.forEach(e => console.log(e));
-            }
-        }
+// Funkcija za logovanje greške
+function logDroneError() {
+    const desc = document.getElementById('errorInput').value.trim();
+    if(!desc) return alert("Unesi opis greške!");
 
-        const logger = new DroneLogger();
+    const type = document.getElementById('errorType').value;
+    const now = new Date();
+    const logLine = `[${type}] ${now.toLocaleString()}: ${desc}`;
+    droneErrors.push(logLine);
+    localStorage.setItem('droneErrors', JSON.stringify(droneErrors));
 
-        // Primer grešaka (možeš zameniti sa stvarnim dron kodom)
-        logger.logError("Signal lost at 30 MHz");
-        logger.logError("Battery low", "WARNING");
-        logger.logError("Motor overload detected");
+    if(type === "ERROR") console.error(logLine);
+    else console.warn(logLine);
 
-        function showConsoleInstructions() {
-            alert("Otvorite konzolu da vidite greške:\n- Windows/Linux: F12 ili Ctrl+Shift+I\n- Mac: Cmd+Option+I\nZatim tab 'Console'.");
-        }
+    updateLogDisplay();
+    document.getElementById('errorInput').value = '';
+}
 
-        function copyLogs() {
-            const text = logger.errors.join('\n');
-            navigator.clipboard.writeText(text)
-                .then(() => alert("Greške kopirane u clipboard!"))
-                .catch(err => alert("Greške se ne mogu kopirati: " + err));
-        }
-    </script>
+// Prikaz svih logova
+function showErrors() {
+    console.log("=== All Drone Errors ===");
+    droneErrors.forEach(e => console.log(e));
+    updateLogDisplay();
+}
+
+// Kopiranje logova u clipboard
+function copyLogs() {
+    const text = droneErrors.join('\n');
+    navigator.clipboard.writeText(text)
+        .then(() => alert("Greške kopirane u clipboard!"))
+        .catch(err => alert("Greške se ne mogu kopirati: " + err));
+}
+
+// Brisanje loga
+function clearLog() {
+    if(confirm("Da li želiš da obrišeš sve logove?")) {
+        droneErrors = [];
+        localStorage.removeItem('droneErrors');
+        updateLogDisplay();
+        console.clear();
+    }
+}
+
+// Prikaz prethodnih logova pri učitavanju stranice
+updateLogDisplay();
+</script>
 </body>
 </html>
