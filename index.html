@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDR++ Error Logger</title>
+<style>
+body { font-family: Arial; background: #1e1e1e; color: #f0f0f0; padding: 20px; }
+h1 { text-align: center; color: #00ff99; }
+form, .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+input, textarea, button { padding: 8px; border: none; border-radius: 4px; font-size: 14px; }
+button { background-color: #00ff99; color: #000; cursor: pointer; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; border-bottom: 1px solid #555; text-align: left; }
+th { background-color: #333; }
+</style>
+</head>
+<body>
+<h1>SDR++ Error Logger</h1>
+
+<form id="errorForm">
+    <input type="text" id="frequency" placeholder="Frequency (Hz)" required>
+    <textarea id="description" placeholder="Error description" rows="1" required></textarea>
+    <button type="submit">Add Error</button>
+</form>
+
+<div class="controls">
+    <button id="downloadTXT">Download TXT</button>
+    <button id="clearAll">Clear All</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date & Time</th>
+            <th>Frequency (Hz)</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody id="errorTable"></tbody>
+</table>
+
+<script>
+const form = document.getElementById('errorForm');
+const table = document.getElementById('errorTable');
+
+let errors = JSON.parse(localStorage.getItem('sdrErrors')) || [];
+
+function renderTable() {
+    table.innerHTML = '';
+    errors.slice().reverse().forEach(e => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${e.datetime}</td><td>${e.frequency}</td><td>${e.description}</td>`;
+        table.appendChild(row);
+    });
+}
+
+// Add new error
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    const frequency = document.getElementById('frequency').value;
+    const description = document.getElementById('description').value;
+    const datetime = new Date().toLocaleString(); // auto date & time
+
+    errors.push({datetime, frequency, description});
+    localStorage.setItem('sdrErrors', JSON.stringify(errors));
+    renderTable();
+    form.reset();
+});
+
+// Download TXT
+document.getElementById('downloadTXT').addEventListener('click', () => {
+    if(errors.length === 0) return alert('No errors to download.');
+    let txt = '';
+    errors.forEach(e => {
+        txt += `Date & Time: ${e.datetime}\nFrequency: ${e.frequency} Hz\nDescription: ${e.description}\n\n`;
+    });
+    const blob = new Blob([txt], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sdr_errors.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// Clear all errors
+document.getElementById('clearAll').addEventListener('click', () => {
+    if(confirm('Are you sure you want to clear all errors?')){
+        errors = [];
+        localStorage.removeItem('sdrErrors');
+        renderTable();
+    }
+});
+
+renderTable();
+</script>
+</body>
+</html>
