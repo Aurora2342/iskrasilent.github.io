@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Drone Error Logger - Console Only</title>
+    <title>Drone Error Logger - Standalone</title>
 </head>
 <body>
-    <h1>Drone Error Logger (Console Only)</h1>
+    <h1>Drone Error Logger (Standalone, Console Only)</h1>
+    <p>Open the browser console to see all logs.</p>
 
     <script>
         // Niz za čuvanje grešaka drona
@@ -52,9 +53,10 @@
             originalWarn.apply(console, args);
         };
 
-        // Primena logError iz tvog dron koda je jednostavna:
+        // Primer simulacije grešaka (samo za test)
         // logError("Signal lost at 30 MHz");
-        // logError("Battery low");
+        // console.warn("Battery low");
     </script>
 </body>
 </html>
+
