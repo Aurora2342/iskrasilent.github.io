@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serbia air maps</title>
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+  }
+
+  /* HEADER */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 55px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-weight: bold;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+  }
+
+  .topbar span {
+    color: #4da3ff;
+    margin-left: 6px;
+  }
+
+  /* MAPA */
+  .map {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 55px);
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* vizuelni “lock” efekat */
+  .shadow {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 55px);
+    pointer-events: none;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.35);
+  }
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  Serbia air maps <span>Serbia</span>
+</div>
+
+<div class="map">
+  <iframe
+    src="https://www.google.com/maps/d/u/0/embed?mid=12lpsWraaDL0jSf0_tM0QsnwFBopoDK0&ehbc=2E312F&noprof=1"
+    loading="lazy">
+  </iframe>
+</div>
+
+<div class="shadow"></div>
+
+</body>
+</html>
