@@ -41,7 +41,7 @@ body{
 <body>
 
 <div class="topbar">
-    Serbian Maps
+    Serbian air Maps
 </div>
 
 <div id="map"></div>
@@ -58,7 +58,9 @@ function initMap(){
     };
 
     const map = new google.maps.Map(document.getElementById("map"),{
-
+        zoomControl:true,
+gestureHandling:"greedy",
+        
         center:{
             lat:44.0165,
             lng:20.9114
