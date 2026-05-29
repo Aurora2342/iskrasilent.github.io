@@ -11,11 +11,13 @@
 body{
     margin:0;
     overflow:hidden;
-    background:#0b0b0b;
     font-family:Arial,sans-serif;
 }
 
-/* HEADER */
+#map{
+    width:100%;
+    height:100vh;
+}
 
 .topbar{
     position:absolute;
@@ -23,29 +25,14 @@ body{
     left:0;
     width:100%;
     height:55px;
-    background:rgba(0,0,0,0.8);
-    color:white;
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(6px);
+    z-index:10;
     display:flex;
     align-items:center;
     padding-left:20px;
-    z-index:10;
     font-weight:bold;
     font-size:18px;
-    backdrop-filter:blur(10px);
-}
-
-/* MAP */
-
-#map{
-    width:100%;
-    height:100vh;
-}
-
-/* DISABLE SELECT */
-
-*{
-    user-select:none;
-    -webkit-user-select:none;
 }
 
 </style>
@@ -60,34 +47,6 @@ body{
 <div id="map"></div>
 
 <script>
-
-/* DISABLE RIGHT CLICK */
-
-document.addEventListener("contextmenu", e => e.preventDefault());
-
-/* DISABLE INSPECT SHORTCUTS */
-
-document.addEventListener("keydown", function(e){
-
-    if(e.key === "F12"){
-        e.preventDefault();
-    }
-
-    if(e.ctrlKey && e.shiftKey && e.key === "I"){
-        e.preventDefault();
-    }
-
-    if(e.ctrlKey && e.shiftKey && e.key === "J"){
-        e.preventDefault();
-    }
-
-    if(e.ctrlKey && e.key === "u"){
-        e.preventDefault();
-    }
-
-});
-
-/* MAP */
 
 function initMap(){
 
@@ -116,16 +75,28 @@ function initMap(){
         },
 
         streetViewControl:false,
-        mapTypeControl:false,
         fullscreenControl:false,
+        mapTypeControl:false
 
+    });
+
+    /* GOOGLE MY MAPS LAYER */
+
+    const kmlLayer = new google.maps.KmlLayer({
+        url:"https://www.google.com/maps/d/kml?mid=12lpsWraaDL0jSf0_tM0QsnwFBopoDK0",
+        map:map,
+        preserveViewport:true
     });
 
 }
 
+/* disable right click */
+
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
 </script>
 
-<!-- UBACI SVOJ API KEY -->
+<!-- UBACI API KEY -->
 
 <script async defer
 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyPVrDne7sF7DDDTmEmfrK9gm_jTjXsVU&callback=initMap">
