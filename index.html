@@ -3,80 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serbia air maps</title>
+
+<title>Serbian air Maps</title>
 
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    background: #0b0b0b;
-  }
 
-  /* HEADER */
-  .topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 55px;
-    background: rgba(0,0,0,0.8);
-    color: white;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    font-weight: bold;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-  }
+body{
+    margin:0;
+    overflow:hidden;
+    background:#0b0b0b;
+    font-family:Arial,sans-serif;
+}
 
-  .topbar span {
-    color: #4da3ff;
-    margin-left: 6px;
-  }
+/* HEADER */
 
-  /* MAPA */
-  .map {
-    position: absolute;
-    top: 55px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 55px);
-  }
+.topbar{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:55px;
+    background:rgba(0,0,0,0.8);
+    color:white;
+    display:flex;
+    align-items:center;
+    padding-left:20px;
+    z-index:10;
+    font-weight:bold;
+    font-size:18px;
+    backdrop-filter:blur(10px);
+}
 
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
+/* MAP */
 
-  /* vizuelni “lock” efekat */
-  .shadow {
-    position: absolute;
-    top: 55px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 55px);
-    pointer-events: none;
-    box-shadow: inset 0 0 120px rgba(0,0,0,0.35);
-  }
+#map{
+    width:100%;
+    height:100vh;
+}
+
+/* DISABLE SELECT */
+
+*{
+    user-select:none;
+    -webkit-user-select:none;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-  Serbia air maps <span>Serbia</span>
+    Serbian Maps
 </div>
 
-<div class="map">
-  <iframe
-    src="https://www.google.com/maps/d/u/0/embed?mid=12lpsWraaDL0jSf0_tM0QsnwFBopoDK0&ehbc=2E312F&noprof=1"
-    loading="lazy">
-  </iframe>
-</div>
+<div id="map"></div>
 
-<div class="shadow"></div>
+<script>
+
+/* DISABLE RIGHT CLICK */
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+/* DISABLE INSPECT SHORTCUTS */
+
+document.addEventListener("keydown", function(e){
+
+    if(e.key === "F12"){
+        e.preventDefault();
+    }
+
+    if(e.ctrlKey && e.shiftKey && e.key === "I"){
+        e.preventDefault();
+    }
+
+    if(e.ctrlKey && e.shiftKey && e.key === "J"){
+        e.preventDefault();
+    }
+
+    if(e.ctrlKey && e.key === "u"){
+        e.preventDefault();
+    }
+
+});
+
+/* MAP */
+
+function initMap(){
+
+    const serbiaBounds = {
+        north:46.3,
+        south:42.1,
+        west:18.8,
+        east:23.1
+    };
+
+    const map = new google.maps.Map(document.getElementById("map"),{
+
+        center:{
+            lat:44.0165,
+            lng:20.9114
+        },
+
+        zoom:7,
+
+        minZoom:6,
+        maxZoom:12,
+
+        restriction:{
+            latLngBounds:serbiaBounds,
+            strictBounds:true
+        },
+
+        streetViewControl:false,
+        mapTypeControl:false,
+        fullscreenControl:false,
+
+        styles:[
+            {
+                featureType:"all",
+                elementType:"geometry",
+                stylers:[{color:"#1c1c1c"}]
+            },
+            {
+                featureType:"all",
+                elementType:"labels.text.fill",
+                stylers:[{color:"#ffffff"}]
+            },
+            {
+                featureType:"water",
+                elementType:"geometry",
+                stylers:[{color:"#0b3d91"}]
+            }
+        ]
+
+    });
+
+}
+
+</script>
+
+<!-- UBACI SVOJ API KEY -->
+
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyPVrDne7sF7DDDTmEmfrK9gm_jTjXsVU&callback=initMap">
+</script>
 
 </body>
 </html>
